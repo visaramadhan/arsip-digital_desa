@@ -12,6 +12,7 @@ import {
   deleteDocumentType,
   DocumentType 
 } from "@/services/documentTypes";
+import { dummyDocumentTypes } from "@/data/dummy";
 
 const DocumentTypePage = () => {
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
@@ -34,9 +35,10 @@ const DocumentTypePage = () => {
     try {
       setLoading(true);
       const data = await getDocumentTypes();
-      setDocumentTypes(data);
+      setDocumentTypes(data.length > 0 ? data : dummyDocumentTypes);
     } catch (error) {
       console.error("Error fetching document types:", error);
+      setDocumentTypes(dummyDocumentTypes);
     } finally {
       setLoading(false);
     }

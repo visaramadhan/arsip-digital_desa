@@ -4,10 +4,16 @@ import "flatpickr/dist/flatpickr.css";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { Metadata } from 'next';
 
 const outfit = Outfit({
   subsets: ["latin"],
 });
+
+export const metadata: Metadata = {
+  title: "Sistem Arsip Digital Desa",
+  description: "Sistem Pengelolaan Arsip Digital Desa",
+};
 
 export default function RootLayout({
   children,

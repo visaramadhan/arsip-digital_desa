@@ -17,7 +17,6 @@ import {
   ChevronDownIcon,
   HorizontaLDots,
 } from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
   name: string;
@@ -283,7 +282,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-4 lg:ml-4 top-0 left-0 px-5 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-[calc(100vh-4rem)] lg:h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out z-50 rounded-2xl shadow-xl border border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -303,29 +302,18 @@ const AppSidebar: React.FC = () => {
       >
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-500 text-white">
+                <FolderIcon className="h-6 w-6" />
+              </div>
+              <h1 className="text-xl font-bold text-gray-800 dark:text-white">
+                Sistem Arsip
+              </h1>
+            </div>
           ) : (
-            <Image
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-white">
+              <FolderIcon className="h-5 w-5" />
+            </div>
           )}
         </Link>
       </div>

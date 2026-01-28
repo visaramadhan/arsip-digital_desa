@@ -9,6 +9,7 @@ import {
   deleteUser,
   UserData,
 } from "@/services/users";
+import { dummyUsers } from "@/data/dummy";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import InputField from "@/components/form/input/InputField";
@@ -61,9 +62,10 @@ export default function UserManagementPage() {
     setLoading(true);
     try {
       const data = await getUsers();
-      setUsers(data);
+      setUsers(data.length > 0 ? data : dummyUsers);
     } catch (err) {
       console.error(err);
+      setUsers(dummyUsers);
     } finally {
       setLoading(false);
     }

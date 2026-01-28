@@ -1,5 +1,6 @@
 import GridShape from "@/components/common/GridShape";
 import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
+import { FolderIcon } from "@/icons";
 
 import { ThemeProvider } from "@/context/ThemeContext";
 import Image from "next/image";
@@ -21,16 +22,18 @@ export default function AuthLayout({
               {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <GridShape />
               <div className="flex flex-col items-center max-w-xs">
-                <Link href="/" className="block mb-4">
-                  <Image
-                    width={231}
-                    height={48}
-                    src="./images/logo/auth-logo.svg"
-                    alt="Logo"
-                  />
+                <Link href="/" className="block mb-6">
+                  <div className="flex items-center gap-3 justify-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500 text-white shadow-lg">
+                      <FolderIcon className="h-7 w-7" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-white tracking-tight">
+                      Sistem Arsip
+                    </h1>
+                  </div>
                 </Link>
                 <p className="text-center text-gray-400 dark:text-white/60">
-                  Free and Open-Source Tailwind CSS Admin Dashboard Template
+                  Sistem Pengelolaan Arsip Digital Desa
                 </p>
               </div>
             </div>

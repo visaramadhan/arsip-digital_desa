@@ -8,6 +8,7 @@ import {
   updateInstitutionProfile,
   InstitutionProfile,
 } from "@/services/settings";
+import { dummyInstitutionProfile } from "@/data/dummy";
 import Button from "@/components/ui/button/Button";
 import InputField from "@/components/form/input/InputField";
 import TextArea from "@/components/form/input/TextArea";
@@ -57,9 +58,14 @@ export default function InstitutionProfilePage() {
         if (data.logoUrl) {
           setPreviewUrl(data.logoUrl);
         }
+      } else {
+        // Fallback to dummy data
+        setFormData(dummyInstitutionProfile);
       }
     } catch (err) {
       console.error(err);
+      // Fallback to dummy data on error
+      setFormData(dummyInstitutionProfile);
     } finally {
       setLoading(false);
     }

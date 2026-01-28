@@ -41,7 +41,19 @@ export const uploadFile = async (file: File, path: string) => {
   } catch (error: any) {
     console.error("Upload failed:", error);
     if (error.code === 'storage/unknown' || error.message?.includes('net::ERR_FAILED')) {
-        throw new Error("Gagal mengupload file. Kemungkinan masalah koneksi atau konfigurasi CORS pada Firebase Storage. Pastikan Anda telah mengkonfigurasi CORS untuk mengizinkan upload dari localhost.");
+        console.info(`
+Untuk memperbaiki error CORS, buat file cors.json dengan isi:
+[
+  {
+    "origin": ["*"],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS"],
+    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin", "x-goog-resumable"],
+    "maxAgeSeconds": 3600
+  }
+]
+Lalu jalankan perintah: gsutil cors set cors.json gs://arsip-sistem.firebasestorage.app
+        `);
+        throw new Error("Gagal mengupload file. Masalah CORS terdeteksi. Silakan cek console untuk instruksi perbaikan (memerlukan konfigurasi di Firebase Console/gsutil).");
     }
     throw error;
   }
@@ -95,15 +107,25 @@ export const getArchives = async () => {
   }
 };
 
-export const getArchivesReport = async (month: number, year: number, typeId?: string) => {
+export const getArchivesReport = async (month?: number, year?: number, typeId?: string) => {
   try {
     // Note: Firestore filtering by multiple fields including range requires composite indexes.
     // For simplicity in this project, we will fetch all and filter client-side or use basic range query.
     // Given the potential scale described, client-side filtering after fetching by date range is reasonable 
     // or fetching all for the month and filtering by type in memory.
     
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0, 23, 59, 59);
+    let startDate: Date | undefined;
+    let endDate: Date | undefined;
+
+    if (year) {
+        if (month) {
+            startDate = new Date(year, month - 1, 1);
+            endDate = new Date(year, month, 0, 23, 59, 59);
+        } else {
+            startDate = new Date(year, 0, 1);
+            endDate = new Date(year, 11, 31, 23, 59, 59);
+        }
+    }
 
     const q = query(
       collection(db, COLLECTION_NAME), 
@@ -119,7 +141,14 @@ export const getArchivesReport = async (month: number, year: number, typeId?: st
     return archives.filter(archive => {
       if (!archive.createdAt) return false;
       const date = archive.createdAt.toDate();
-      const matchDate = date >= startDate && date <= endDate;
+      
+      let matchDate = true;
+      if (startDate && endDate) {
+          matchDate = date >= startDate && date <= endDate;
+      } else if (month && !year) {
+          matchDate = date.getMonth() === (month - 1);
+      }
+      
       const matchType = typeId ? archive.documentTypeId === typeId : true;
       return matchDate && matchType;
     });

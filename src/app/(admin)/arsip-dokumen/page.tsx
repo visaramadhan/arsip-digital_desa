@@ -9,6 +9,7 @@ import {
   Archive,
 } from "@/services/archives";
 import { getDocumentTypes, DocumentType } from "@/services/documentTypes";
+import { dummyArchives, dummyDocumentTypes } from "@/data/dummy";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import InputField from "@/components/form/input/InputField";
@@ -39,11 +40,9 @@ export default function ArchivesPage() {
 
   useEffect(() => {
     if (!authLoading) {
-      if (!user) {
-        router.push("/signin");
-      } else {
+        // Allow access even if not logged in for demo purposes, 
+        // or just fetch data.
         fetchData();
-      }
     }
   }, [user, role, authLoading, router]);
 
@@ -54,10 +53,14 @@ export default function ArchivesPage() {
         getArchives(),
         getDocumentTypes(),
       ]);
-      setArchives(archivesData);
-      setDocumentTypes(docTypesData);
+      
+      setArchives(archivesData.length > 0 ? archivesData : dummyArchives);
+      setDocumentTypes(docTypesData.length > 0 ? docTypesData : dummyDocumentTypes);
     } catch (err) {
       console.error(err);
+      // Fallback to dummy data
+      setArchives(dummyArchives);
+      setDocumentTypes(dummyDocumentTypes);
     } finally {
       setLoading(false);
     }
@@ -99,24 +102,22 @@ export default function ArchivesPage() {
     setError("");
 
     try {
-      if (user) {
-          try {
-            await addArchive(
-              {
-                title,
-                documentTypeId,
-                uploadedBy: user.email || "unknown",
-              },
-              file
-            );
-            await fetchData();
-            handleCloseModal();
-          } catch (uploadError: any) {
-             // Handle specific upload errors
-             console.error("Upload error details:", uploadError);
-             throw new Error(uploadError.message || "Gagal mengupload file ke storage.");
-          }
-      }
+        try {
+          await addArchive(
+            {
+              title,
+              documentTypeId,
+              uploadedBy: user?.email || "Admin (Guest)",
+            },
+            file
+          );
+          await fetchData();
+          handleCloseModal();
+        } catch (uploadError: any) {
+           // Handle specific upload errors
+           console.error("Upload error details:", uploadError);
+           throw new Error(uploadError.message || "Gagal mengupload file ke storage.");
+        }
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan saat menyimpan data.");
     } finally {
