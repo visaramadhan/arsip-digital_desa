@@ -303,17 +303,41 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-500 text-white">
-                <FolderIcon className="h-6 w-6" />
-              </div>
-              <h1 className="text-xl font-bold text-gray-800 dark:text-white">
-                Sistem Arsip
+              {true ? (
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white">
+                  <Image
+                    src="/default-logo.png"
+                    alt="Logo"
+                    width={40}
+                    height={40}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-500 text-white">
+                  <FolderIcon className="h-6 w-6" />
+                </div>
+              )}
+              <h1 className="text-xl font-bold text-gray-800 dark:text-white truncate max-w-[190px]">
+{"Sistem Arsip"}
               </h1>
             </div>
           ) : (
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-white">
-              <FolderIcon className="h-5 w-5" />
-            </div>
+            true ? (
+              <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white">
+                <Image
+                  src="/default-logo.png"
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-white">
+                <FolderIcon className="h-5 w-5" />
+              </div>
+            )
           )}
         </Link>
       </div>

@@ -6,6 +6,7 @@ import { FolderIcon } from "@/icons";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
+import { profile } from "console";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -118,11 +119,23 @@ const AppHeader: React.FC = () => {
 
           <Link href="/" className="lg:hidden">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-white">
-                <FolderIcon className="h-5 w-5" />
-              </div>
-              <h1 className="text-lg font-bold text-gray-800 dark:text-white">
-                Sistem Arsip
+              {true ? (
+                <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white">
+                  <Image
+                    src="/images/logo.png"
+                    alt="Logo"
+                    width={32}
+                    height={32}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-white">
+                  <FolderIcon className="h-5 w-5" />
+                </div>
+              )}
+              <h1 className="text-lg font-bold text-gray-800 dark:text-white truncate max-w-[200px]">
+                {profile?.name || "Sistem Arsip"}
               </h1>
             </div>
           </Link>

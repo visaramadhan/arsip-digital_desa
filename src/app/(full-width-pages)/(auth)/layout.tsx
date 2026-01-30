@@ -1,8 +1,10 @@
+"use client";
 import GridShape from "@/components/common/GridShape";
 import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
 import { FolderIcon } from "@/icons";
 
 import { ThemeProvider } from "@/context/ThemeContext";
+import { useSettings } from "@/context/SettingsContext";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -12,6 +14,8 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { profile } = useSettings();
+
   return (
     <div className="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <ThemeProvider>
@@ -24,16 +28,28 @@ export default function AuthLayout({
               <div className="flex flex-col items-center max-w-xs">
                 <Link href="/" className="block mb-6">
                   <div className="flex items-center gap-3 justify-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500 text-white shadow-lg">
-                      <FolderIcon className="h-7 w-7" />
-                    </div>
+                    {true ? (
+                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg">
+                        <Image
+                          src="/default-logo.png"
+                          alt="Logo"
+                          width={48}
+                          height={48}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500 text-white shadow-lg">
+                        <FolderIcon className="h-7 w-7" />
+                      </div>
+                    )}
                     <h1 className="text-2xl font-bold text-white tracking-tight">
-                      Sistem Arsip
+                      {profile?.name || "Sistem Arsip"}
                     </h1>
                   </div>
                 </Link>
                 <p className="text-center text-gray-400 dark:text-white/60">
-                  Sistem Pengelolaan Arsip Digital Desa
+                  {profile?.description || "Sistem Pengelolaan Arsip Digital Desa"}
                 </p>
               </div>
             </div>

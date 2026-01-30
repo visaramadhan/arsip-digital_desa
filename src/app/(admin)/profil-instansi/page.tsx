@@ -106,6 +106,9 @@ export default function InstitutionProfilePage() {
         logoUrl: currentLogoUrl,
       });
 
+      // Refresh global settings context
+      await fetchData();
+
       setSuccess("Profil instansi berhasil diperbarui.");
     } catch (err: any) {
       console.error(err);
