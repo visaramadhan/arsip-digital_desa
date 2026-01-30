@@ -305,10 +305,10 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center gap-2">
-              {profile?.logo ? (
+              {profile?.logoUrl ? (
                 <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white">
                   <Image
-                    src={profile.logo}
+                    src={profile.logoUrl}
                     alt="Logo"
                     width={40}
                     height={40}
@@ -325,10 +325,10 @@ const AppSidebar: React.FC = () => {
               </h1>
             </div>
           ) : (
-            profile?.logo ? (
+            profile?.logoUrl ? (
               <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white">
                 <Image
-                  src={profile.logo}
+                  src={profile.logoUrl}
                   alt="Logo"
                   width={32}
                   height={32}

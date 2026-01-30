@@ -37,10 +37,10 @@ export default function SignInForm() {
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 sm:p-10 w-full">
       {/* Logo Section */}
       <div className="flex justify-center mb-6">
-        {profile?.logo ? (
+        {profile?.logoUrl ? (
           <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-brand-500/10 p-2">
             <Image
-              src={profile.logo}
+              src={profile.logoUrl}
               alt="Logo"
               width={64}
               height={64}

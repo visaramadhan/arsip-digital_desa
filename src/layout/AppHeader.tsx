@@ -120,10 +120,10 @@ const AppHeader: React.FC = () => {
 
           <Link href="/" className="lg:hidden">
             <div className="flex items-center gap-2">
-              {profile?.logo ? (
+              {profile?.logoUrl ? (
                 <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white">
                   <Image
-                    src={profile.logo}
+                    src={profile.logoUrl}
                     alt="Logo"
                     width={32}
                     height={32}
