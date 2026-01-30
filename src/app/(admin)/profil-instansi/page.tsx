@@ -52,7 +52,17 @@ export default function InstitutionProfilePage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await getInstitutionProfile();
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Timeout")), 5000)
+      );
+
+      // Race the fetch against the timeout
+      const data = await Promise.race([
+        getInstitutionProfile(),
+        timeoutPromise
+      ]) as InstitutionProfile | null;
+
       if (data) {
         setFormData(data);
         if (data.logoUrl) {
@@ -63,7 +73,7 @@ export default function InstitutionProfilePage() {
         setFormData(dummyInstitutionProfile);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching data or timeout:", err);
       // Fallback to dummy data on error
       setFormData(dummyInstitutionProfile);
     } finally {

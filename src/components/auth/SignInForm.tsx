@@ -1,19 +1,16 @@
 "use client";
-import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
-import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
-import Link from "next/link";
+import { EyeCloseIcon, EyeIcon, LockIcon, UserIcon, FolderIcon } from "@/icons";
 import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/context/SettingsContext";
+import Image from "next/image";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -37,96 +34,93 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="flex flex-col flex-1 lg:w-1/2 w-full">
-      <div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
-        <Link
-          href="/"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-        >
-          <ChevronLeftIcon />
-          Kembali ke Dashboard
-        </Link>
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 sm:p-10 w-full">
+      {/* Logo Section */}
+      <div className="flex justify-center mb-6">
+        {profile?.logo ? (
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-brand-500/10 p-2">
+            <Image
+              src={profile.logo}
+              alt="Logo"
+              width={64}
+              height={64}
+              className="h-full w-full object-contain"
+            />
+          </div>
+        ) : (
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg">
+            <FolderIcon className="h-8 w-8" />
+          </div>
+        )}
       </div>
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-        <div>
-          <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Selamat Datang Kembali
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Masuk ke akun Anda untuk melanjutkan ke {profile?.name || "Sistem Arsip"}.
-            </p>
-          </div>
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-          <div>
-            <form onSubmit={handleSignIn}>
-              <div className="space-y-6">
-                <div>
-                  <Label>
-                    Email <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <Input 
-                    placeholder="info@gmail.com" 
-                    type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>
-                    Password <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      placeholder="Masukkan password Anda"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute transform -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
-                      ) : (
-                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Checkbox
-                        checked={isChecked}
-                        onChange={setIsChecked}
-                      />
-                      <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                        Ingat saya
-                      </span>
-                    </div>
-                    <Link
-                      href="/auth/forgot-password"
-                      className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                    >
-                      Lupa Password?
-                    </Link>
-                  </div>
-                </div>
-                <div>
-                  <Button className="w-full" size="sm" disabled={loading} type="submit">
-                    {loading ? "Sedang Masuk..." : "Masuk"}
-                  </Button>
-                </div>
-              </div>
-            </form>
-          </div>
+
+      {/* Title Section */}
+      <div className="mb-8 text-center">
+        <h1 className="text-gray-800 dark:text-white font-medium text-lg leading-relaxed">
+          {profile?.dashboardTitle || "Sistem Informasi Pengelolaan Arsip Digital Dokumen Administrasi Kependudukan"}
+        </h1>
+      </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm text-center">
+          {error}
         </div>
+      )}
+
+      <form onSubmit={handleSignIn} className="space-y-5">
+        <div className="relative">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+            <UserIcon className="w-5 h-5" />
+          </div>
+          <Input
+            placeholder="Username"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="pl-12"
+            required
+          />
+        </div>
+
+        <div className="relative">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
+            <LockIcon className="w-5 h-5" />
+          </div>
+          <Input
+            placeholder="Password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="pl-12 pr-12"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none z-10"
+          >
+            {showPassword ? (
+              <EyeIcon className="w-5 h-5" />
+            ) : (
+              <EyeCloseIcon className="w-5 h-5" />
+            )}
+          </button>
+        </div>
+
+        <Button 
+          className="w-full bg-brand-500 hover:bg-brand-600 text-white font-medium py-2.5 rounded-lg transition-colors uppercase tracking-wide" 
+          disabled={loading} 
+          type="submit"
+        >
+          {loading ? "Loading..." : "LOGIN"}
+        </Button>
+      </form>
+
+      {/* Footer */}
+      <div className="mt-8 text-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          © {new Date().getFullYear()} - <span className="text-brand-500">{profile?.name || "Pustaka Koding."}</span>
+        </p>
       </div>
     </div>
   );

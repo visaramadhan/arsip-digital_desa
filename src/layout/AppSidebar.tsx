@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
+import { useSettings } from "@/context/SettingsContext";
 import {
   GridIcon,
   FolderIcon,
@@ -84,6 +85,7 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const { role } = useAuth();
+  const { profile } = useSettings();
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -303,10 +305,10 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center gap-2">
-              {true ? (
+              {profile?.logo ? (
                 <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white">
                   <Image
-                    src="/default-logo.png"
+                    src={profile.logo}
                     alt="Logo"
                     width={40}
                     height={40}
@@ -319,14 +321,14 @@ const AppSidebar: React.FC = () => {
                 </div>
               )}
               <h1 className="text-xl font-bold text-gray-800 dark:text-white truncate max-w-[190px]">
-{"Sistem Arsip"}
+                {profile?.name || "Sistem Arsip"}
               </h1>
             </div>
           ) : (
-            true ? (
+            profile?.logo ? (
               <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white">
                 <Image
-                  src="/default-logo.png"
+                  src={profile.logo}
                   alt="Logo"
                   width={32}
                   height={32}

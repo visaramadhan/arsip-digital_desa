@@ -25,10 +25,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchProfile = async () => {
     try {
-      const data = await getInstitutionProfile();
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Timeout")), 5000)
+      );
+
+      // Race the fetch against the timeout
+      const data = await Promise.race([
+        getInstitutionProfile(),
+        timeoutPromise
+      ]) as InstitutionProfile | null;
+
       setProfile(data || dummyInstitutionProfile);
     } catch (error) {
-      console.error("Failed to fetch settings:", error);
+      console.error("Failed to fetch settings (or timeout):", error);
       setProfile(dummyInstitutionProfile);
     } finally {
       setLoading(false);

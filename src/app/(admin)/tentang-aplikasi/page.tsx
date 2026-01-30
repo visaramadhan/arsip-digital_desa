@@ -1,19 +1,21 @@
 "use client";
 import React from "react";
 import PageBreadCrumb from "@/components/common/PageBreadCrumb";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function AboutAppPage() {
+  const { profile } = useSettings();
+
   return (
     <div>
       <PageBreadCrumb pageTitle="Tentang Aplikasi" />
       
       <div className="rounded-2xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-white/[0.03]">
         <h1 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white/90">
-          Sistem Informasi Pengelolaan Arsip Digital
+          {profile?.name || "Sistem Informasi Pengelolaan Arsip Digital"}
         </h1>
         <p className="mb-6 text-gray-600 dark:text-gray-400">
-          Sistem ini dirancang untuk mempermudah pengelolaan dokumen administrasi kependudukan secara digital.
-          Aplikasi ini membantu dalam pengarsipan, pencarian, dan pelaporan dokumen penting instansi.
+          {profile?.description || "Sistem ini dirancang untuk mempermudah pengelolaan dokumen administrasi kependudukan secara digital. Aplikasi ini membantu dalam pengarsipan, pencarian, dan pelaporan dokumen penting instansi."}
         </p>
 
         <div className="space-y-6">
@@ -42,7 +44,7 @@ export default function AboutAppPage() {
 
         <div className="mt-8 border-t border-gray-100 pt-6 dark:border-gray-800">
           <p className="text-center text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Sistem Arsip Digital. All rights reserved.
+            &copy; {new Date().getFullYear()} {profile?.name || "Sistem Arsip Digital"}. All rights reserved.
           </p>
         </div>
       </div>

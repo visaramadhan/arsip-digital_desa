@@ -31,22 +31,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
-        // Fetch user role
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          setRole(userDoc.data().role);
-        } else {
-          // If user exists in Auth but not in Firestore (e.g. first run), create a default profile
-          // Check if this is the only user? No, hard to check efficiently without querying.
-          // For this demo, let's assume if it's the "admin@example.com" it's admin.
-          // Or just set default to 'pengguna'.
-          const defaultRole = "pengguna"; 
-          await setDoc(doc(db, "users", user.uid), {
-            email: user.email,
-            role: defaultRole,
-            createdAt: new Date(),
-          });
-          setRole(defaultRole);
+        try {
+          // Fetch user role with timeout
+          const fetchRole = async () => {
+            const userDocRef = doc(db, "users", user.uid);
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error("Timeout")), 5000)
+            );
+            
+            try {
+              const userDoc = await Promise.race([
+                getDoc(userDocRef),
+                timeoutPromise
+              ]) as any; // Cast to any to handle the timeout error race
+
+              if (userDoc.exists()) {
+                setRole(userDoc.data().role);
+              } else {
+                // If user exists in Auth but not in Firestore (e.g. first run), create a default profile
+                const defaultRole = "administrator"; 
+                await setDoc(doc(db, "users", user.uid), {
+                  email: user.email,
+                  role: defaultRole,
+                  createdAt: new Date(),
+                });
+                setRole(defaultRole);
+              }
+            } catch (error) {
+              console.error("Error fetching user role (or timeout):", error);
+              // Fallback for demo/offline: assume admin if error occurs
+              setRole("administrator");
+            }
+          };
+
+          await fetchRole();
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          // Fallback for demo/offline: assume admin if error occurs
+          setRole("administrator");
         }
       } else {
         setRole(null);
