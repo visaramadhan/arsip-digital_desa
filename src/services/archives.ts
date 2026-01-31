@@ -1,4 +1,4 @@
-import { Archive } from "@/models/Archive"; // Type definition only if shared, but usually services define their own or share
+import { IArchive } from "@/models/Archive"; // Type definition only if shared, but usually services define their own or share
 
 export interface ArchiveData {
   id: string; // MongoDB _id
