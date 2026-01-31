@@ -198,11 +198,11 @@ export default function ArchivesPage() {
                         {archive.uploadedBy}
                       </td>
                       <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
-                        {new Date(archive.createdAt).toLocaleDateString("id-ID", {
+                        {archive.createdAt ? new Date(archive.createdAt).toLocaleDateString("id-ID", {
                           day: "numeric",
                           month: "long",
                           year: "numeric",
-                        })}
+                        }) : "-"}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
