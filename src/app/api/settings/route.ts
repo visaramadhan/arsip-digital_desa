@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Institution from '@/models/Institution';
-import { writeFile } from 'fs/promises';
+import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import { mkdir } from 'fs/promises';
 
 export async function GET() {
   try {
@@ -33,6 +32,11 @@ export async function POST(request: NextRequest) {
     const description = formData.get('description') as string;
     const dashboardTitle = formData.get('dashboardTitle') as string;
     
+    // Validation
+    if (!name || !address || !phone || !email || !description) {
+        return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
     // Handle Logo Upload
     const logoFile = formData.get('logo') as File | null;
     let logoUrl = formData.get('existingLogoUrl') as string | undefined;
@@ -59,7 +63,14 @@ export async function POST(request: NextRequest) {
     // Handle PDF Uploads
     const documentFiles = formData.getAll('documents') as File[];
     const existingDocumentsJson = formData.get('existingDocuments') as string;
-    let documents = existingDocumentsJson ? JSON.parse(existingDocumentsJson) : [];
+    let documents: any[] = existingDocumentsJson ? JSON.parse(existingDocumentsJson) : [];
+    
+    // Ensure existing documents have the correct structure
+    documents = documents.map(doc => ({
+        name: doc.name,
+        url: doc.url,
+        uploadedAt: doc.uploadedAt || new Date()
+    }));
 
     for (const docFile of documentFiles) {
       if (docFile instanceof File && docFile.size > 0) {
@@ -86,16 +97,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const updateData = {
+    const updateData: any = {
       name,
       address,
       phone,
       email,
       description,
       dashboardTitle,
-      logoUrl,
       documents,
     };
+    
+    if (logoUrl) {
+        updateData.logoUrl = logoUrl;
+    }
 
     // Find and update or create new
     // We assume only one profile exists effectively, but let's use findOneAndUpdate with upsert
@@ -106,8 +120,8 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json(institution);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating institution settings:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

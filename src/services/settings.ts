@@ -39,7 +39,16 @@ export const updateInstitutionProfile = async (formData: FormData) => {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to update institution profile');
+      let errorMessage = 'Failed to update institution profile';
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch (e) {
+        // ignore JSON parse error
+      }
+      throw new Error(errorMessage);
     }
     
     return await response.json();
