@@ -7,8 +7,7 @@ import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
 export default function SignUpForm() {
@@ -40,12 +39,18 @@ export default function SignUpForm() {
       // In a real app, only Admin can create other admins or roles are assigned differently
       const role = email.includes("admin") ? "administrator" : "pengguna";
 
-      await setDoc(doc(db, "users", user.uid), {
-        firstName,
-        lastName,
-        email,
-        role,
-        createdAt: new Date(),
+      // Save user profile to MongoDB via API
+      await fetch(`/api/users/${user.uid}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          role,
+        }),
       });
 
       router.push("/");

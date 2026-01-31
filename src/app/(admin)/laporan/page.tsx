@@ -82,7 +82,10 @@ const ReportPage = () => {
         // Fallback to dummy data but apply filters
         data = dummyArchives.filter(archive => {
            if (!archive.createdAt) return false;
-           const date = archive.createdAt.toDate();
+           // Handle string date (ISO) or Firestore Timestamp (legacy)
+           const date = typeof archive.createdAt === 'string' 
+              ? new Date(archive.createdAt) 
+              : (archive.createdAt as any).toDate ? (archive.createdAt as any).toDate() : new Date(archive.createdAt);
            
            let matchYear = true;
            if (yearInt) {
@@ -370,7 +373,15 @@ const ReportPage = () => {
                       {index + 1}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-800 dark:text-white/90">
-                      {archive.createdAt ? new Date(archive.createdAt.toDate()).toLocaleDateString("id-ID") : "-"}
+                      {archive.createdAt
+                        ? new Date(
+                            typeof archive.createdAt === "string"
+                              ? archive.createdAt
+                              : (archive.createdAt as any).toDate
+                              ? (archive.createdAt as any).toDate()
+                              : archive.createdAt
+                          ).toLocaleDateString("id-ID")
+                        : "-"}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-800 dark:text-white/90">
                       {archive.title}

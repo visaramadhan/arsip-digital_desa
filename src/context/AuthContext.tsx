@@ -1,8 +1,7 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
 interface AuthContextType {
@@ -32,42 +31,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(user);
       if (user) {
         try {
-          // Fetch user role with timeout
+          // Fetch user role from MongoDB API
           const fetchRole = async () => {
-            const userDocRef = doc(db, "users", user.uid);
-            const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error("Timeout")), 5000)
-            );
-            
             try {
-              const userDoc = await Promise.race([
-                getDoc(userDocRef),
-                timeoutPromise
-              ]) as any; // Cast to any to handle the timeout error race
+                const response = await fetch(`/api/users/${user.uid}`);
+                if (response.ok) {
+                    const userData = await response.json();
+                    if (userData) {
+                        setRole(userData.role);
+                        return;
+                    }
+                }
+                
+                // If user not found (404) or other error, create default
+                // Only create if 404 (not found)
+                if (response.status === 404) {
+                    const defaultRole = "administrator";
+                    const createResponse = await fetch(`/api/users/${user.uid}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: user.email,
+                            role: defaultRole,
+                            firstName: user.displayName?.split(' ')[0] || 'User',
+                            lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+                        })
+                    });
+                    
+                    if (createResponse.ok) {
+                        const newUser = await createResponse.json();
+                        setRole(newUser.role);
+                    } else {
+                         setRole(defaultRole); // Fallback
+                    }
+                } else {
+                    setRole("administrator"); // Fallback on error
+                }
 
-              if (userDoc.exists()) {
-                setRole(userDoc.data().role);
-              } else {
-                // If user exists in Auth but not in Firestore (e.g. first run), create a default profile
-                const defaultRole = "administrator"; 
-                await setDoc(doc(db, "users", user.uid), {
-                  email: user.email,
-                  role: defaultRole,
-                  createdAt: new Date(),
-                });
-                setRole(defaultRole);
-              }
             } catch (error) {
-              console.error("Error fetching user role (or timeout):", error);
-              // Fallback for demo/offline: assume admin if error occurs
+              console.error("Error fetching user role:", error);
               setRole("administrator");
             }
           };
 
           await fetchRole();
         } catch (error) {
-          console.error("Error fetching user role:", error);
-          // Fallback for demo/offline: assume admin if error occurs
+          console.error("Error in auth flow:", error);
           setRole("administrator");
         }
       } else {

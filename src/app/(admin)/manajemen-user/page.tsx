@@ -211,7 +211,15 @@ export default function UserManagementPage() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                      {userData.createdAt?.toDate().toLocaleDateString("id-ID") || "-"}
+                      {userData.createdAt
+                        ? new Date(
+                            typeof userData.createdAt === "string"
+                              ? userData.createdAt
+                              : (userData.createdAt as any).toDate
+                              ? (userData.createdAt as any).toDate()
+                              : userData.createdAt
+                          ).toLocaleDateString("id-ID")
+                        : "-"}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">

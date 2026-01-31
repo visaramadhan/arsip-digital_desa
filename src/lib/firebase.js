@@ -2,7 +2,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
@@ -21,11 +20,11 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize services
 const auth = getAuth(app);
-// Initialize Firestore with settings to prevent connection issues
-const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-  localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
-});
+// Firestore connection removed as per user request to use MongoDB
+// const db = initializeFirestore(app, {
+//   experimentalForceLongPolling: true,
+//   localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+// });
 const storage = getStorage(app);
 
 let analytics;
@@ -37,4 +36,4 @@ if (typeof window !== "undefined") {
   });
 }
 
-export { app, auth, db, storage, analytics };
+export { app, auth, storage, analytics };

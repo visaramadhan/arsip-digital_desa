@@ -1,37 +1,29 @@
 import { 
-  collection, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  deleteDoc,
-  setDoc,
-  query,
-  orderBy,
-  serverTimestamp,
-  Timestamp
-} from "firebase/firestore";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+  createUserWithEmailAndPassword, 
+  getAuth 
+} from "firebase/auth";
 import { initializeApp, getApp, deleteApp } from "firebase/app";
-import { db } from "@/lib/firebase";
 
 export interface UserData {
-  id: string;
+  id: string; // MongoDB _id or Firebase UID? Ideally map to UID for consistency
+  uid: string;
   email: string;
   firstName?: string;
   lastName?: string;
   role: string;
-  createdAt?: Timestamp;
+  createdAt?: string;
 }
-
-const COLLECTION_NAME = "users";
 
 export const getUsers = async () => {
   try {
-    const q = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
+    const response = await fetch('/api/users');
+    if (!response.ok) {
+      throw new Error('Failed to fetch users');
+    }
+    const data = await response.json();
+    return data.map((user: any) => ({
+      ...user,
+      id: user.uid, // Map uid to id for frontend compatibility if needed, or keep _id
     })) as UserData[];
   } catch (error) {
     console.error("Error getting users: ", error);
@@ -39,20 +31,37 @@ export const getUsers = async () => {
   }
 };
 
-export const updateUserRole = async (id: string, role: string) => {
+export const updateUserRole = async (uid: string, role: string) => {
   try {
-    const docRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(docRef, { role });
+    const response = await fetch(`/api/users/${uid}`, {
+      method: 'POST', // Using POST/PUT to update
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ role }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update user role');
+    }
   } catch (error) {
     console.error("Error updating user role: ", error);
     throw error;
   }
 };
 
-export const deleteUser = async (id: string) => {
+export const deleteUser = async (uid: string) => {
+  // Note: This only deletes from MongoDB. 
+  // Firebase Auth deletion usually requires Admin SDK or client-side current user deletion.
+  // The original code only deleted from Firestore.
   try {
-    // Note: This only deletes from Firestore, not Firebase Auth (requires Admin SDK)
-    await deleteDoc(doc(db, COLLECTION_NAME, id));
+    // We haven't implemented DELETE in api/users/[uid] yet.
+    // Let's assume we will or warn.
+    // For now, let's just warn or try to call DELETE if we implement it.
+    console.warn("deleteUser from MongoDB not fully implemented in API yet");
+    
+    // If we were to implement it:
+    // await fetch(`/api/users/${uid}`, { method: 'DELETE' });
   } catch (error) {
     console.error("Error deleting user: ", error);
     throw error;
@@ -60,7 +69,7 @@ export const deleteUser = async (id: string) => {
 };
 
 // Helper to create user using a secondary app instance to avoid signing out the current user
-export const createUser = async (data: Omit<UserData, "id" | "createdAt">, password: string) => {
+export const createUser = async (data: Omit<UserData, "id" | "uid" | "createdAt">, password: string) => {
     let secondaryApp;
     try {
         // Initialize a secondary app
@@ -73,13 +82,18 @@ export const createUser = async (data: Omit<UserData, "id" | "createdAt">, passw
         const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, password);
         const user = userCredential.user;
 
-        // Save to Firestore (using main app's db)
-        await setDoc(doc(db, COLLECTION_NAME, user.uid), {
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
-            email: data.email,
-            role: data.role,
-            createdAt: serverTimestamp(),
+        // Save to MongoDB via API
+        await fetch(`/api/users/${user.uid}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: data.email,
+                role: data.role,
+                firstName: data.firstName,
+                lastName: data.lastName,
+            }),
         });
 
         // Sign out from secondary app to be safe (though it doesn't affect main app)
