@@ -20,7 +20,7 @@ export async function GET(
     const contentType = archive.contentType || 'application/octet-stream';
     const fileName = archive.fileName || 'download.bin';
 
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as any, {
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `inline; filename="${fileName}"`,
