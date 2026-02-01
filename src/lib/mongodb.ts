@@ -20,7 +20,7 @@ async function connectToDatabase() {
 
   if (!MONGODB_URI) {
     throw new Error(
-      'Please define the MONGODB_URI environment variable inside .env.local'
+      'MONGODB_URI is not defined in the environment variables. Please add it in your .env.local file (for local development) or Vercel Project Settings (for production).'
     );
   }
 

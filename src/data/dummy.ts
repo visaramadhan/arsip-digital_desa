@@ -136,7 +136,7 @@ export const dummyInstitutionProfile = {
   email: "info@desacontoh.go.id",
   description: "Website Sistem Arsip Digital Desa Contoh",
   dashboardTitle: "Sistem Arsip Digital",
-  logoUrl: "/logo-placeholder.png",
+  logoUrl: "/logo-placeholder.svg",
   documents: [],
   updatedAt: new Date().toISOString(),
 };
