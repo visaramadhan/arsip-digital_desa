@@ -49,6 +49,10 @@ export async function PUT(
       updateData,
       { new: true }
     );
+
+    if (!updatedArchive) {
+      return NextResponse.json({ error: 'Failed to update archive' }, { status: 500 });
+    }
     
     // Remove binary data from response
     const responseArchive = updatedArchive.toObject();
