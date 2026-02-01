@@ -28,3 +28,20 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    await connectToDatabase();
+    const body = await request.json();
+    
+    if (!body.name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
+    const newDocType = await DocumentType.create(body);
+    return NextResponse.json(newDocType, { status: 201 });
+  } catch (error) {
+    console.error('Error creating document type:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

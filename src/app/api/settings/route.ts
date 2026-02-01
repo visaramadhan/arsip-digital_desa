@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Institution from '@/models/Institution';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 
 export async function GET() {
   try {
@@ -42,22 +42,15 @@ export async function POST(request: NextRequest) {
     let logoUrl = formData.get('existingLogoUrl') as string | undefined;
 
     if (logoFile && logoFile.size > 0) {
+      const sanitizedFileName = logoFile.name.replace(/[^a-zA-Z0-9.]/g, "_");
+      const filename = `settings/logo-${Date.now()}-${sanitizedFileName}`;
+      const storageRef = ref(storage, filename);
+      
       const bytes = await logoFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
       
-      const filename = `logo-${Date.now()}${path.extname(logoFile.name)}`;
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      
-      // Ensure directory exists
-      try {
-        await mkdir(uploadDir, { recursive: true });
-      } catch (e) {
-        // Ignore if exists
-      }
-      
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-      logoUrl = `/uploads/${filename}`;
+      const snapshot = await uploadBytes(storageRef, buffer);
+      logoUrl = await getDownloadURL(snapshot.ref);
     }
 
     // Handle PDF Uploads
@@ -74,24 +67,19 @@ export async function POST(request: NextRequest) {
 
     for (const docFile of documentFiles) {
       if (docFile instanceof File && docFile.size > 0) {
+        const sanitizedFileName = docFile.name.replace(/[^a-zA-Z0-9.]/g, "_");
+        const filename = `settings/doc-${Date.now()}-${sanitizedFileName}`;
+        const storageRef = ref(storage, filename);
+        
         const bytes = await docFile.arrayBuffer();
         const buffer = Buffer.from(bytes);
         
-        const filename = `doc-${Date.now()}-${docFile.name}`;
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-        
-        try {
-          await mkdir(uploadDir, { recursive: true });
-        } catch (e) {
-          // Ignore
-        }
-        
-        const filepath = path.join(uploadDir, filename);
-        await writeFile(filepath, buffer);
+        const snapshot = await uploadBytes(storageRef, buffer);
+        const fileUrl = await getDownloadURL(snapshot.ref);
         
         documents.push({
           name: docFile.name,
-          url: `/uploads/${filename}`,
+          url: fileUrl,
           uploadedAt: new Date(),
         });
       }
@@ -103,25 +91,28 @@ export async function POST(request: NextRequest) {
       phone,
       email,
       description,
-      dashboardTitle,
+      dashboardTitle: dashboardTitle || "Sistem Arsip Digital Desa",
       documents,
     };
     
     if (logoUrl) {
-        updateData.logoUrl = logoUrl;
+      updateData.logoUrl = logoUrl;
     }
 
-    // Find and update or create new
-    // We assume only one profile exists effectively, but let's use findOneAndUpdate with upsert
-    const institution = await Institution.findOneAndUpdate(
-      {}, 
-      updateData, 
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
+    // Upsert: update if exists, insert if not
+    // We only want ONE institution profile
+    const existing = await Institution.findOne();
+    let result;
+    
+    if (existing) {
+        result = await Institution.findByIdAndUpdate(existing._id, updateData, { new: true });
+    } else {
+        result = await Institution.create(updateData);
+    }
 
-    return NextResponse.json(institution);
-  } catch (error: any) {
-    console.error('Error updating institution settings:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 });
   }
 }

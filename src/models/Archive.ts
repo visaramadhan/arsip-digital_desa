@@ -4,9 +4,11 @@ export interface IArchive {
   title: string;
   documentTypeId: string;
   documentTypeName: string;
-  fileUrl: string;
+  fileUrl: string; // Will point to our internal API
   fileName: string;
-  storagePath: string; // Keeping this for compatibility, though it might be local path
+  storagePath: string; // Not used for MongoDB storage, but kept for schema compatibility
+  fileData?: Buffer; // Binary data
+  contentType?: string; // MIME type
   uploadedBy: string; // User UID
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +22,8 @@ const ArchiveSchema = new Schema<IArchive>(
     fileUrl: { type: String, required: true },
     fileName: { type: String, required: true },
     storagePath: { type: String },
+    fileData: { type: Buffer },
+    contentType: { type: String },
     uploadedBy: { type: String, required: true },
   },
   {

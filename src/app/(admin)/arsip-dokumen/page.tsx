@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   getArchives,
   addArchive,
+  updateArchive,
   deleteArchive,
   Archive,
 } from "@/services/archives";
@@ -16,7 +17,7 @@ import InputField from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
 import FileInput from "@/components/form/input/FileInput";
 import Label from "@/components/form/Label";
-import { TrashBinIcon, PlusIcon, DownloadIcon, EyeIcon } from "@/icons";
+import { TrashBinIcon, PlusIcon, DownloadIcon, EyeIcon, PencilIcon } from "@/icons";
 import PageBreadCrumb from "@/components/common/PageBreadCrumb";
 import Link from "next/link";
 
@@ -34,6 +35,8 @@ export default function ArchivesPage() {
   const [title, setTitle] = useState("");
   const [documentTypeId, setDocumentTypeId] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
@@ -71,6 +74,18 @@ export default function ArchivesPage() {
     setDocumentTypeId("");
     setFile(null);
     setError("");
+    setIsEditing(false);
+    setEditId(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (archive: Archive) => {
+    setTitle(archive.title);
+    setDocumentTypeId(archive.documentTypeId);
+    setFile(null); // File is optional in edit
+    setError("");
+    setIsEditing(true);
+    setEditId(archive.id);
     setIsModalOpen(true);
   };
 
@@ -79,6 +94,8 @@ export default function ArchivesPage() {
     setTitle("");
     setDocumentTypeId("");
     setFile(null);
+    setIsEditing(false);
+    setEditId(null);
   };
 
   const handleOpenDeleteModal = (archive: Archive) => {
@@ -93,7 +110,7 @@ export default function ArchivesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !documentTypeId || !file) {
+    if (!title || !documentTypeId || (!isEditing && !file)) {
       setError("Semua field harus diisi.");
       return;
     }
@@ -103,20 +120,33 @@ export default function ArchivesPage() {
 
     try {
         try {
-          await addArchive(
-            {
-              title,
-              documentTypeId,
-              uploadedBy: user?.email || "Admin (Guest)",
-            },
-            file
-          );
+          if (isEditing && editId) {
+             // const currentArchiveToEdit = archives.find(a => a.id === editId); // No longer needed
+             await updateArchive(
+                editId,
+                {
+                    title,
+                    documentTypeId,
+                    uploadedBy: user?.email || "Admin (Guest)",
+                },
+                file || undefined
+             );
+          } else {
+              await addArchive(
+                {
+                  title,
+                  documentTypeId,
+                  uploadedBy: user?.email || "Admin (Guest)",
+                },
+                file!
+              );
+          }
           await fetchData();
           handleCloseModal();
         } catch (uploadError: any) {
            // Handle specific upload errors
-           console.error("Upload error details:", uploadError);
-           throw new Error(uploadError.message || "Gagal mengupload file ke storage.");
+           console.error("Upload/Update error details:", uploadError);
+           throw new Error(uploadError.message || "Gagal menyimpan data.");
         }
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan saat menyimpan data.");
@@ -214,15 +244,24 @@ export default function ArchivesPage() {
                           >
                             <DownloadIcon className="size-5" />
                           </Link>
-                          {(role === "administrator" || role === "pengelola_arsip") && (
-                             <button
-                                onClick={() => handleOpenDeleteModal(archive)}
-                                className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500"
-                                title="Hapus"
-                              >
-                                <TrashBinIcon className="size-5" />
-                              </button>
-                          )}
+                          {/* {(role === "administrator" || role === "pengelola_arsip") && ( */}
+                             <>
+                               <button
+                                 onClick={() => handleOpenEditModal(archive)}
+                                 className="text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-500"
+                                 title="Edit"
+                               >
+                                 <PencilIcon className="size-5" />
+                               </button>
+                               <button
+                                  onClick={() => handleOpenDeleteModal(archive)}
+                                  className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500"
+                                  title="Hapus"
+                                >
+                                  <TrashBinIcon className="size-5" />
+                                </button>
+                             </>
+                          {/* )} */}
                         </div>
                       </td>
                     </tr>
@@ -234,10 +273,10 @@ export default function ArchivesPage() {
         </div>
       </div>
 
-      {/* Add Modal */}
+      {/* Add/Edit Modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} className="max-w-[500px] p-6">
         <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
-          Tambah Arsip Dokumen
+          {isEditing ? "Edit Arsip Dokumen" : "Tambah Arsip Dokumen"}
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputField
@@ -253,13 +292,14 @@ export default function ArchivesPage() {
             <Select
                 options={docTypeOptions}
                 onChange={(val) => setDocumentTypeId(val)}
+                value={documentTypeId}
                 placeholder="Pilih Jenis Dokumen"
                 className="w-full"
             />
           </div>
 
           <div>
-             <Label>Upload File (PDF/Image)</Label>
+             <Label>Upload File (PDF/Image) {isEditing && <span className="text-xs text-gray-400 font-normal">(Opsional - Biarkan kosong jika tidak ingin mengubah file)</span>}</Label>
              <FileInput 
                 accept=".pdf,.jpg,.jpeg,.png"
                 onChange={(e) => {
