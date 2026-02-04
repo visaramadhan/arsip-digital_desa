@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import Button from "@/components/ui/button/Button";
 import Select from "@/components/form/Select";
@@ -15,6 +17,8 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 });
 
 const ReportPage = () => {
+  const { user, role, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
   const [archives, setArchives] = useState<Archive[]>([]);
   const [loading, setLoading] = useState(false);
@@ -114,6 +118,16 @@ const ReportPage = () => {
       setLoading(false);
     }
   }, [filter.month, filter.year, filter.typeId]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        router.push("/signin");
+      } else if (role !== "administrator" && role !== "pimpinan") {
+        router.push("/");
+      }
+    }
+  }, [user, role, authLoading, router]);
 
   useEffect(() => {
     fetchDocTypes();

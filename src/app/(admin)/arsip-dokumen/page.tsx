@@ -183,13 +183,15 @@ export default function ArchivesPage() {
       <PageBreadCrumb pageTitle="Arsip Dokumen" />
       <div className="space-y-6">
         <div className="flex justify-end">
-          <Button
-            size="sm"
-            onClick={handleOpenModal}
-            startIcon={<PlusIcon className="size-5" />}
-          >
-            Tambah Arsip
-          </Button>
+          {role === "administrator" && (
+            <Button
+              size="sm"
+              onClick={handleOpenModal}
+              startIcon={<PlusIcon className="size-5" />}
+            >
+              Tambah Arsip
+            </Button>
+          )}
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
@@ -244,7 +246,7 @@ export default function ArchivesPage() {
                           >
                             <DownloadIcon className="size-5" />
                           </Link>
-                          {/* {(role === "administrator" || role === "pengelola_arsip") && ( */}
+                          {role === "administrator" && (
                              <>
                                <button
                                  onClick={() => handleOpenEditModal(archive)}
@@ -261,7 +263,7 @@ export default function ArchivesPage() {
                                   <TrashBinIcon className="size-5" />
                                 </button>
                              </>
-                          {/* )} */}
+                          )}
                         </div>
                       </td>
                     </tr>

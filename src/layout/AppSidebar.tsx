@@ -32,31 +32,31 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     path: "/",
-    roles: ["administrator", "pengelola_arsip", "pengguna"],
+    roles: ["administrator", "pimpinan"],
   },
   {
     icon: <FolderIcon />,
     name: "Arsip Dokumen",
     path: "/arsip-dokumen",
-    roles: ["administrator", "pengelola_arsip", "pengguna"],
+    roles: ["administrator", "pimpinan"],
   },
   {
     icon: <DocsIcon />,
     name: "Jenis Dokumen",
     path: "/jenis-dokumen",
-    roles: ["administrator", "pengelola_arsip"],
+    roles: ["administrator"],
   },
   {
     icon: <PieChartIcon />,
     name: "Laporan",
     path: "/laporan",
-    roles: ["administrator", "pengelola_arsip"],
+    roles: ["administrator", "pimpinan"],
   },
   {
     icon: <BoxCubeIcon />,
     name: "Profil Instansi",
     path: "/profil-instansi",
-    roles: ["administrator"],
+    roles: ["administrator", "pimpinan"],
   },
   {
     icon: <GroupIcon />,
@@ -71,13 +71,13 @@ const othersItems: NavItem[] = [
     icon: <LockIcon />,
     name: "Ubah Password",
     path: "/ubah-password",
-    roles: ["administrator", "pengelola_arsip", "pengguna"],
+    roles: ["administrator", "pimpinan"],
   },
   {
     icon: <InfoIcon />,
     name: "Tentang Aplikasi",
     path: "/tentang-aplikasi",
-    roles: ["administrator", "pengelola_arsip", "pengguna"],
+    roles: ["administrator", "pimpinan"],
   },
 ];
 
@@ -150,9 +150,9 @@ const AppSidebar: React.FC = () => {
     });
   };
 
-  // Temporarily show all items regardless of role
-  const filteredNavItems = navItems; 
-  const filteredOthersItems = othersItems; 
+  // Filter items based on role
+  const filteredNavItems = navItems.filter((item) => item.roles?.includes(role || ""));
+  const filteredOthersItems = othersItems.filter((item) => item.roles?.includes(role || "")); 
 
   const renderMenuItems = (
     navItems: NavItem[],

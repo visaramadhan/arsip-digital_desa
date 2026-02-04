@@ -76,21 +76,21 @@ export default function Dashboard() {
       value: loading ? "..." : counts.archives,
       icon: <FolderIcon className="size-6 text-brand-500" />,
       link: "/arsip-dokumen",
-      roles: ["administrator", "pengelola_arsip", "pengguna"],
+      roles: ["administrator", "pimpinan"],
     },
     {
       title: "Jenis Dokumen",
       value: loading ? "..." : counts.types,
       icon: <DocsIcon className="size-6 text-blue-500" />,
       link: "/jenis-dokumen",
-      roles: ["administrator", "pengelola_arsip"],
+      roles: ["administrator"],
     },
     {
       title: "Laporan",
       value: "Lihat",
       icon: <PieChartIcon className="size-6 text-green-500" />,
       link: "/laporan",
-      roles: ["administrator", "pengelola_arsip"],
+      roles: ["administrator", "pimpinan"],
     },
     {
       title: "Manajemen User",
@@ -163,10 +163,7 @@ export default function Dashboard() {
                       <TableCell>{archive.documentTypeName || "-"}</TableCell>
                       <TableCell>
                         {archive.createdAt
-                          ? new Date(
-                              // @ts-ignore
-                              archive.createdAt.seconds * 1000
-                            ).toLocaleDateString("id-ID")
+                          ? new Date(archive.createdAt).toLocaleDateString("id-ID")
                           : "-"}
                       </TableCell>
                     </TableRow>

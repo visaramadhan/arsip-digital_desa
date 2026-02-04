@@ -43,16 +43,16 @@ export default function UserManagementPage() {
 
   const roleOptions = [
     { value: "administrator", label: "Administrator" },
-    { value: "pengelola_arsip", label: "Pengelola Arsip" },
-    { value: "pengguna", label: "Pengguna" },
+    { value: "pimpinan", label: "Pimpinan" },
   ];
 
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
         router.push("/signin");
+      } else if (role !== "administrator") {
+        router.push("/");
       } else {
-        // Temporarily allow all users to access for development
         fetchData();
       }
     }

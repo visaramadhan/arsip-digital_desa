@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
@@ -15,6 +17,8 @@ import {
 import { dummyDocumentTypes } from "@/data/dummy";
 
 const DocumentTypePage = () => {
+  const { user, role, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -28,8 +32,16 @@ const DocumentTypePage = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchDocumentTypes();
-  }, []);
+    if (!authLoading) {
+      if (!user) {
+        router.push("/signin");
+      } else if (role !== "administrator") {
+        router.push("/");
+      } else {
+        fetchDocumentTypes();
+      }
+    }
+  }, [user, role, authLoading, router]);
 
   const fetchDocumentTypes = async () => {
     try {

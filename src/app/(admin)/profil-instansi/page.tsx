@@ -42,7 +42,7 @@ export default function InstitutionProfilePage() {
     if (!authLoading) {
       if (!user) {
         router.push("/signin");
-      } else if (role !== "administrator") {
+      } else if (role !== "administrator" && role !== "pimpinan") {
         router.push("/");
       } else {
         fetchData();
