@@ -23,9 +23,9 @@ const ReportPage = () => {
   const [archives, setArchives] = useState<Archive[]>([]);
   const [loading, setLoading] = useState(false);
   const [chartData, setChartData] = useState<{
-    series: number[];
-    labels: string[];
-  }>({ series: [], labels: [] });
+    series: { name: string; data: number[] }[];
+    categories: string[];
+  }>({ series: [], categories: [] });
   
   // Filter states
   const currentYear = new Date().getFullYear();
@@ -139,24 +139,23 @@ const ReportPage = () => {
     // Calculate summary for chart and table
     const summaryMap = new Map<string, number>();
     
-    // Initialize with 0 for all types to ensure consistent colors/order if needed, 
-    // or just let it be dynamic based on data. 
-    // Let's rely on data present in archives for the report.
-    
     archives.forEach(archive => {
       const typeName = archive.documentTypeName || "Tanpa Kategori";
       summaryMap.set(typeName, (summaryMap.get(typeName) || 0) + 1);
     });
 
-    const series: number[] = [];
-    const labels: string[] = [];
+    const data: number[] = [];
+    const categories: string[] = [];
 
     summaryMap.forEach((count, name) => {
-      series.push(count);
-      labels.push(name);
+      data.push(count);
+      categories.push(name);
     });
 
-    setChartData({ series, labels });
+    setChartData({ 
+      series: [{ name: "Total Arsip", data: data }], 
+      categories: categories 
+    });
   }, [archives]);
 
   const handlePrint = () => {
@@ -170,54 +169,58 @@ const ReportPage = () => {
 
   const chartOptions: ApexOptions = {
     chart: {
-      type: "donut",
+      type: "bar",
       fontFamily: "inherit",
-    },
-    labels: chartData.labels,
-    colors: ["#3C50E0", "#80CAEE", "#0FADCF", "#6577F3", "#8FD0EF", "#0FADCF"],
-    legend: {
-      show: true,
-      position: "bottom",
+      toolbar: {
+        show: false,
+      },
     },
     plotOptions: {
-      pie: {
-        donut: {
-          size: "65%",
-          labels: {
-            show: true,
-            total: {
-              showAlways: true,
-              show: true,
-              label: "Total Arsip",
-              fontSize: "16px",
-              fontWeight: 600,
-              color: "#333",
-            },
-          },
-        },
+      bar: {
+        borderRadius: 4,
+        horizontal: false,
+        columnWidth: "50%",
       },
     },
     dataLabels: {
-      enabled: true,
+      enabled: false,
     },
-    responsive: [
-      {
-        breakpoint: 2600,
-        options: {
-          chart: {
-            width: 380,
-          },
+    xaxis: {
+      categories: chartData.categories,
+      labels: {
+        style: {
+          colors: "#64748B",
+          fontSize: "12px",
         },
       },
-      {
-        breakpoint: 640,
-        options: {
-          chart: {
-            width: 200,
-          },
+    },
+    yaxis: {
+      title: {
+        text: "Jumlah Arsip",
+      },
+    },
+    colors: ["#3C50E0"],
+    grid: {
+      borderColor: "#e0e0e0",
+      strokeDashArray: 5,
+      xaxis: {
+        lines: {
+          show: false,
         },
       },
-    ],
+      yaxis: {
+        lines: {
+          show: true,
+        },
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: function (val) {
+          return val + " Arsip";
+        },
+      },
+    },
   };
 
   return (
@@ -296,11 +299,12 @@ const ReportPage = () => {
             <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
               Statistik Arsip
             </h3>
-            <div className="flex justify-center">
+            <div className="w-full">
               <ReactApexChart
                 options={chartOptions}
                 series={chartData.series}
-                type="donut"
+                type="bar"
+                height={350}
               />
             </div>
           </div>
@@ -319,13 +323,13 @@ const ReportPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {chartData.labels.map((label, index) => (
+                  {chartData.categories.map((label, index) => (
                     <tr key={index}>
                       <td className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">
                         {label}
                       </td>
                       <td className="px-4 py-3 text-sm text-center text-gray-800 dark:text-white/90">
-                        {chartData.series[index]}
+                        {chartData.series[0]?.data[index] || 0}
                       </td>
                     </tr>
                   ))}
@@ -334,7 +338,7 @@ const ReportPage = () => {
                       Total
                     </td>
                     <td className="px-4 py-3 text-sm text-center text-gray-900 dark:text-white">
-                      {chartData.series.reduce((a, b) => a + b, 0)}
+                      {chartData.series[0]?.data.reduce((a, b) => a + b, 0) || 0}
                     </td>
                   </tr>
                 </tbody>
